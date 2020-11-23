@@ -1,31 +1,30 @@
-const fs = require('fs');
+const fetch = require("node-fetch");
+const fs = require("fs");
 const zipper = require("./zipStream");
 const https = require("https");
 const urls = require("./urls.json");
 
-zipper.ZipStreamer()
-  .then(archive => {
-
-    urls.forEach((url, i) => {
+zipper.ZipStreamer().then((archive) => {
+  Promise.all(
+    urls.map((url, i) => {
       console.log(`Trying for ${i}`);
-      https.get(url, response => { 
-        console.log(`---------------------- Fetched ${i}`)
-        archive.append(response);
-      });
+      return fetch(url);
+    })
+  ).then((responses) => {
+    responses.map((response, index) => {
+      if (response.ok) {
+        archive.append(response.body, { name: `${index}.txt` });
+      }
     });
-    
-    // append a file from stream
-    // const file1 = './big.file';
-    // for (let i = 0; i < 10; i++) {
-    //   archive.append(fs.createReadStream(file1), { name: `file${i + 20}.txt` });
-    // }
-    // archive.finalize();
-    return archive;
-  })
-  .then(archive => archive.finalize())
+  }).finally(() => archive.finalize());
 
-
-
+  // append a file from stream
+  // const file1 = './big.file';
+  // for (let i = 0; i < 10; i++) {
+  //   archive.append(fs.createReadStream(file1), { name: `file${i + 20}.txt` });
+  // }
+  // archive.finalize();
+});
 
 // const archiver = require("archiver");
 // const stream = require("stream");
