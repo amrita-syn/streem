@@ -12,6 +12,7 @@
   "dependencies": {
     "archiver": "^5.0.2",
     "jszip": "^3.5.0",
+    "node-fetch": "^2.6.1",
     "node-stream-zip": "^1.11.3"
   }
 }
